@@ -1,0 +1,192 @@
+import numpy as np
+import pandas as pd
+import copy
+import re
+
+from IPython.display import display_html
+
+def dictprint(d):
+    print('Risky values:',*zip(d.keys(),d.values()),sep='\n\n')
+    pass
+    
+
+def display_sbs(dfs_list, max_rows = 100, suffix = 'table', titles = [''],ret = False,sep = ''):
+    
+    '''
+    Displays dataframes as html tables and side by side (if they do not fit, they are
+    represented below)
+    '''
+    
+    # If titles list empty or not all titles given, empy titles will be assigned
+
+    html_tables = ''
+    for i, df in enumerate(dfs_list): # Iterating over all the dfs added as args
+        
+        if isinstance(df,pd.core.series.Series): # If df is acc series, convert to df
+            df = df.to_frame()
+        
+        # If titles undefined or not enough titles
+        if titles == [''] or i >= len(titles):
+            # title equal to the string-sum of column names with commas (removing last comma with [-2]) + _suffix
+            title = (df.columns.values + ', ').sum()[:-2] + ' ' + suffix
+        else:
+            title = titles[i]
+        
+        first_row = 0
+        last_row = max_rows
+        prints_no = int(np.ceil(len(df)/max_rows)) if len(df) >= max_rows else 1
+        
+        for _ in range(prints_no):
+            df_s = df.iloc[first_row:last_row]
+            # First converted to style, adding caption 
+            df_s = df_s.style.set_table_attributes("style='display:inline'").set_caption(title)
+            # Style can be converted to html
+            html_tables += df_s.to_html()
+
+            first_row = copy.copy(last_row)
+            last_row += max_rows
+            title = '' # After first loop title is empty
+        html_tables += sep # Adding separator ("&emsp;" for tab for example) only between separate dfs
+            
+    # And displayed using display_html
+    display_html(html_tables,raw = True)
+
+    if ret:
+        return html_tables
+    else:
+        pass
+    
+
+    
+def save_as_html(html_object,filename='report.html'):
+    data, metadata = get_ipython().display_formatter.format(html_object)
+    with open(filename, 'w') as f:
+        f.write(data['text/html']) 
+    pass
+    
+    
+    
+def kwordcheck(df,kwordsdict,scancols = [],getbools = False):
+    '''
+    This code returns a df with same index as original df and with same column name 
+    as the column being checked for keywords when getbools is passed as True. If False
+    (default), function will return a dictionary instead based on kwordsdict and with 
+    df values corresponding with passed keywords (more efficient). Kwordsdict is a 
+    dictionary with the columns of dfs to assess as keys and keywords lists as values. 
+    Scancols specify columns for which values will be scanned instead of exactly matched 
+    (empty by default, less efficient but necessary for free-text-like variables such as 
+    facility/payer/provider names). When getbools is True, the output df has boolean 
+    values (True if row/column value in original df contains keyword, False otherwise). 
+    This boolean df can be used to check value counts on df, remove offending rows... 
+    '''
+    
+    # Columns of output df are the columns present in the kwordsdict
+    cols = [key for key in kwordsdict.keys() if re.sub('__subcat_.+$','',key) in df.columns]
+    original_cols = [re.sub('__subcat_.+$','',col) for col in cols]
+    unique_values = 0
+    # If getbools is True (default False)
+    if getbools: 
+        # Output initialised with zeroes and the index is equal to the input df index
+        risky_values = pd.DataFrame(index=df.index, columns=cols)
+
+        # Iterates over matched columns (column to check kwords on)
+        for i,col in enumerate(cols):
+            kwords = kwordsdict[col]
+            # Original column (without the subcat) in df
+            original_col = original_cols[i]
+            # If column passed as one of the columns to be "scanned"
+            if original_col in scancols:
+                risky_values[col] = False
+                # Iterates over keywords in keyword list for each value
+                for word in kwords:
+                    # If one of the keywords is contained in the column strings, value of risky_values is True
+                    # Removing suffix from column name of original df
+                    risky_values[col] = risky_values[col] | df[original_col].str.contains(word, case = False)
+            else: # Looking for exact match (more efficient and default option) if no need for scanning
+                # Checking against lowercase df (only if first value is string)
+                if isinstance(df[original_col].dropna().iloc[0],str):
+                    kwords = [word.lower() for word in kwords]
+                    risky_values[col] = df[original_col].str.lower().isin(kwords)
+                else:
+                    risky_values[col] = df[original_col].isin(kwords)
+    
+    # If boolean to locate values on original df not needed (getbools=False), unique values will be returned
+    else:
+        # Output is a dictionary now based on kwordsdict
+        keys = cols # Just for clarity
+        risky_values = dict.fromkeys(keys)
+        for i,ky in enumerate(keys):
+            kwords = kwordsdict[ky]
+            # Original column (without the subcat) in df
+            original_col = original_cols[i]
+            # Unique values only computed if original column is first column or different to previous one (for speed)
+            unique_values = df[original_col].unique() if i==0 or original_col!=original_cols[i-1] else unique_values
+            # If column passed as one of the columns to be "scanned"
+            if original_col in scancols:
+                risky_bool = [False]*len(unique_values)
+                # Iterates over keywords in keyword list for each value
+                for word in kwords:
+                    # If one of the keywords is contained in the column strings, value of risky_bool is True
+                    risky_bool = risky_bool | pd.Series(unique_values).str.contains(word,case=False)
+                # Storing matched values on risky_values for relevant key
+                risky_values[ky] = unique_values[risky_bool]
+            # Looking for exact match (more efficient and default)
+            else:
+                # Checking against lowercase df (only if first value is string)
+                if isinstance(unique_values[0],str):
+                    kwords = [word.lower() for word in kwords]
+                    risky_bool = np.isin(np.char.lower(unique_values.astype(str)),kwords)
+                else:
+                    risky_bool = np.isin(unique_values,kwords)
+                risky_values[ky] = unique_values[risky_bool]
+
+    return risky_values
+
+
+def kword_dict_maker(cols,categories,values):
+    d = dict()
+    for col in cols:
+        for i,cat in enumerate(categories):
+            d[col+'__subcat_'+cat] = values[i]
+    
+    return d
+
+
+def code_inspector(s,printrows=None,sep='\t'):
+    
+    unique_values = np.sort(s.dropna().unique())
+    name = s.name
+    print(f'Number of characters in code {name}',pd.Series(unique_values).apply(len).describe(),sep='\n',end='\n')
+    print(f'\nUnique {name} codes:')
+    print(*unique_values[:printrows],sep=sep,end='\n')
+    pass
+
+
+def get_all_codes():
+  
+    from reference_data.file_operations import get_all_code_categories
+    
+    possible_codes = set()
+    for cct in get_all_code_categories():
+        possible_codes.update(get_code_category_code_types(cct))
+    possible_codes = list(possible_codes)
+    possible_codes.sort()
+    return possible_codes
+    
+def get_categories(code,display_dfs = True, tail = 25):
+    
+    from reference_data.search import load_codeset
+    from reference_data.file_operations import get_all_code_categories, get_code_category_code_types
+    
+    df_dict = dict()
+    for cct in get_all_code_categories():
+        if code in get_code_category_code_types(cct):
+            df_dict[cct]=load_codeset(cct,code)
+            df_dict[cct]=df_dict[cct].where(df_dict[cct]!='').dropna(how='all',axis=1)
+    
+    if display_dfs:
+        display_sbs([df.tail(tail) for df in df_dict.values()],titles = [title for title in df_dict.keys()])
+        
+              
+    return df_dict
+    

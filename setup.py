@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 setup(name='genutils',
       version='0.1',
       description='What the module does',
@@ -6,4 +6,4 @@ setup(name='genutils',
       author='Ignacio Medina Fernandez',
       author_email='nacmed94@gmail.com',
       license='GNU v3',
-      packages=['genutils.py']
+      packages=find_packages()

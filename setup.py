@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 setup(
 name='pycho',
 version='0.1',
@@ -7,5 +7,5 @@ url='https://github.com/NacMed94/pycho',
 author='Ignacio Medina Fernandez',
 author_email='nacmed94@gmail.com',
 license='GNU v3',
-packages='pycho'
+packages=find_packages()
 )

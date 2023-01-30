@@ -6,4 +6,4 @@ setup(name='genutils',
       author='Ignacio Medina Fernandez',
       author_email='nacmed94@gmail.com',
       license='GNU v3',
-      packages=['genutils']
+      packages=['genutils.py']

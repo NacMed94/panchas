@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 setup(
-name='pycho',
+name='panchas',
 version='0.1',
 description='What the module does',
 url='https://github.com/NacMed94/pycho',

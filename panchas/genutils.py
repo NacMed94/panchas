@@ -45,7 +45,7 @@ def display_sbs(dfs_list, max_rows = 100, suffix = 'table', titles = [''],ret = 
 
             first_row = copy.copy(last_row)
             last_row += max_rows
-            title = '\n' # After first loop title is empty
+            title = '<br>' # After first loop title is empty
         html_tables += sep # Adding separator ("&emsp;" for tab for example) only between separate dfs
             
     # And displayed using display_html

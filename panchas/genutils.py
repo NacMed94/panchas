@@ -40,12 +40,12 @@ def display_sbs(dfs_list, max_rows = 100, suffix = 'table', titles = [''],ret = 
             df_s = df.iloc[first_row:last_row]
             # First converted to style, adding caption 
             df_s = df_s.style.set_table_attributes("style='display:inline'").set_caption(title)
-            # Style can be converted to html
+            # Style converted to html
             html_tables += df_s.to_html()
 
             first_row = copy.copy(last_row)
             last_row += max_rows
-            title = '' # After first loop title is empty
+            title = '\n' # After first loop title is empty
         html_tables += sep # Adding separator ("&emsp;" for tab for example) only between separate dfs
             
     # And displayed using display_html

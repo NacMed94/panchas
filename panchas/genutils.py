@@ -174,7 +174,11 @@ def get_all_codes():
     return possible_codes
     
 def get_categories(code,display_dfs = True, tail = 25):
-    
+    '''
+    Returns dictionary where keys are categories from the reference-data package and values are
+    dataframes with codes and description of risky codes
+    '''
+
     from reference_data.search import load_codeset
     from reference_data.file_operations import get_all_code_categories, get_code_category_code_types
     

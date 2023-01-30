@@ -10,7 +10,7 @@ def dictprint(d):
     pass
     
 
-def display_sbs(dfs_list, max_rows = 100, suffix = 'table', titles = [''],ret = False,sep = ''):
+def display_sbs(dfs_list, max_rows = 100, suffix = 'table', titles = [''],ret = False,sep = '&emsp;'):
     
     '''
     Displays dataframes as html tables and side by side (if they do not fit, they are
@@ -45,8 +45,8 @@ def display_sbs(dfs_list, max_rows = 100, suffix = 'table', titles = [''],ret = 
 
             first_row = copy.copy(last_row)
             last_row += max_rows
-            title = '<br>' # After first loop title is empty
-        html_tables += sep # Adding separator ("&emsp;" for tab for example) only between separate dfs
+            title = '<br>' # After first loop title is empty (linebreak for aligning)
+        html_tables += sep # Adding separator (default "&emsp;" for tabulation) only between separate dfs
             
     # And displayed using display_html
     display_html(html_tables,raw = True)

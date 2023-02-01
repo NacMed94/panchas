@@ -5,6 +5,7 @@ import re
 
 from IPython.display import display_html
 
+
 def dictprint(d):
     print('Risky values:',*zip(d.keys(),d.values()),sep='\n\n')
     pass
@@ -55,7 +56,6 @@ def display_sbs(dfs_list, max_rows = 100, suffix = 'table', titles = [''],ret = 
         return html_tables
     else:
         pass
-    
 
     
 def save_as_html(html_object,filename='report.html'):
@@ -63,7 +63,6 @@ def save_as_html(html_object,filename='report.html'):
     with open(filename, 'w') as f:
         f.write(data['text/html']) 
     pass
-    
     
     
 def kwordcheck(df,kwordsdict,scancols = [],getbools = False):
@@ -212,10 +211,11 @@ def address_comparator(df,maincols,statecols,zipcols):
         for digits in range(3):
             print(f'{round(100*(df.loc[notnas_state_bool,maincols[1]].str[digits] == df.loc[notnas_state_bool,col].str[digits]).mean(),2)}% of {digits+1}-digit ZIPs coincide between {maincols[1]} and {col}')
 
-pass
+    pass
+
 
 def get_zip3state():
-    
+
     ''' Returns df with ZIPs in one column and their apolcor state in the other. Fisher's Island only has NY'''
 
     from reference_data.search import load_codeset

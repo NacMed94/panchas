@@ -220,8 +220,9 @@ def get_zip3state():
 
     from reference_data.search import load_codeset
 
+    state_zip3 = load_codeset('state_zip3')
     # Taking all zips from row 52 of zip3_state (skipping first as empty string)
-    zip3_state = pd.DataFrame(data = np.unique(load_codeset('state_zip3').loc[52].zips[1:]),columns = ['zips'])
+    zip3_state = pd.DataFrame(data = np.unique(state_zip3.loc[52].zips[1:]),columns = ['zips'])
     # First apply makes boolean of states for each zip. Second apply returns correct state(s)
     zip3_state['state'] = zip3_state.zips.apply(lambda zip: [zip in zips for zips in state_zip3.zips.loc[:51]]).apply(lambda boolean: state_zip3.loc[:51].state.values[boolean])
     # Unnesting and removing NY from Fisher's Island ZIP code (063)

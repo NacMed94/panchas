@@ -10,7 +10,7 @@ def dictprint(d):
     pass
     
 
-def display_sbs(dfs_list, max_rows = 100, suffix = 'table', titles = [''],ret = False,sep = '&emsp;'):
+def display_sbs(dfs_list, max_rows = 100, suffix = 'table', titles = [''],ret = False,sep = ''):
     
     '''
     Displays dataframes as html tables and side by side (if they do not fit, they are
@@ -40,13 +40,13 @@ def display_sbs(dfs_list, max_rows = 100, suffix = 'table', titles = [''],ret = 
             df_s = df.iloc[first_row:last_row]
             # First converted to style, adding caption 
             df_s = df_s.style.set_table_attributes("style='display:inline'").set_caption(title)
-            # Style converted to html
+            # Style can be converted to html
             html_tables += df_s.to_html()
 
             first_row = copy.copy(last_row)
             last_row += max_rows
-            title = '<br>' # After first loop title is empty (linebreak for aligning)
-        html_tables += sep # Adding separator (default "&emsp;" for tabulation) only between separate dfs
+            title = '' # After first loop title is empty
+        html_tables += sep # Adding separator ("&emsp;" for tab for example) only between separate dfs
             
     # And displayed using display_html
     display_html(html_tables,raw = True)
@@ -133,7 +133,7 @@ def kwordcheck(df,kwordsdict,scancols = [],getbools = False):
             # Looking for exact match (more efficient and default)
             else:
                 # Checking against lowercase df (only if first value is string)
-                if isinstance(unique_values[0],str):
+              if isinstance(unique_values[0],str):
                     kwords = [word.lower() for word in kwords]
                     risky_bool = np.isin(np.char.lower(unique_values.astype(str)),kwords)
                 else:
@@ -144,7 +144,6 @@ def kwordcheck(df,kwordsdict,scancols = [],getbools = False):
 
 
 def kword_dict_maker(cols,categories,values):
-    ''' Standard dictionary maker for kwordcheck function '''
     d = dict()
     for col in cols:
         for i,cat in enumerate(categories):
@@ -174,7 +173,6 @@ def get_all_codes():
     possible_codes.sort()
     return possible_codes
     
-
 def get_categories(code,display_dfs = True, tail = 25):
     '''
     Returns dictionary where keys are categories from the reference-data package and values are
@@ -196,20 +194,3 @@ def get_categories(code,display_dfs = True, tail = 25):
               
     return df_dict
     
-
-def address_comparator(df,maincols,statecols,zipcols):
-    
-    # Dropping any row wih null values for any of the columns to make a fair comparison
-    notnas_state_bool = df[[maincols[0]] + statecols].notna().all(axis=1)
-    notnas_zip_bool = df[[maincols[1]] + zipcols].notna().all(axis=1)
-    # Comparing state
-    for col in statecols:
-        print(f'{round(100*(df.loc[notnas_state_bool,maincols[0]] == df.loc[notnas_state_bool,col]).mean(),2)}% of states coincide between {maincols[0]} and {col}')
-    
-    # Comparing ZIP code digits (up to 3)
-    for col in zipcols:
-        print()
-        for digits in range(3):
-            print(f'{round(100*(df.loc[notnas_state_bool,maincols[1]].str[digits] == df.loc[notnas_state_bool,col].str[digits]).mean(),2)}% of {digits+1}-digit ZIPs coincide between {maincols[1]} and {col}')
-
-pass

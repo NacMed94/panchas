@@ -213,3 +213,18 @@ def address_comparator(df,maincols,statecols,zipcols):
             print(f'{round(100*(df.loc[notnas_state_bool,maincols[1]].str[digits] == df.loc[notnas_state_bool,col].str[digits]).mean(),2)}% of {digits+1}-digit ZIPs coincide between {maincols[1]} and {col}')
 
 pass
+
+def get_zip3state():
+    
+    ''' Returns df with ZIPs in one column and their apolcor state in the other. Fisher's Island only has NY'''
+
+    from reference_data.search import load_codeset
+
+    # Taking all zips from row 52 of zip3_state (skipping first as empty string)
+    zip3_state = pd.DataFrame(data = np.unique(load_codeset('state_zip3').loc[52].zips[1:]),columns = ['zips'])
+    # First apply makes boolean of states for each zip. Second apply returns correct state(s)
+    zip3_state['state'] = zip3_state.zips.apply(lambda zip: [zip in zips for zips in state_zip3.zips.loc[:51]]).apply(lambda boolean: state_zip3.loc[:51].state.values[boolean])
+    # Unnesting and removing NY from Fisher's Island ZIP code (063)
+    zip3_state['state'] = zip3_state.state.apply(lambda row: row[0])
+
+    return zip3_state

@@ -273,3 +273,48 @@ def check_zipstate_misal(df, zipcol,statecol):
     print(f'There are {misal_bool.sum()} claims with misaligned ZIP and state')
 
     return misal_bool
+
+
+def smallzip_merger(df, zipcol, inplace=True):
+    ''' 
+    Finds small ZIPs and merges them with neighbour with format SMALLZIP_NEIGHBOUR
+    Uses kwordcheck twice (would be faster if integrated but quick solution)
+    '''
+    from reference_data.search import load_codeset
+    from panchas import kwordcheck
+    
+    zip3_small = load_codeset('zip3_small')
+    # Not taking into account ZIP code 576 whose population is larger than 20K
+    zip3_small = zip3_small.loc[zip3_small.pop_less_than_20000 == 'true',['code','neighbor']]
+
+    # We find list of relevant ZIP codes and their neighbours
+    smallzips_values = list(kwordcheck(df,{zipcol:zip3_small.code})[zipcol])
+    # 879 is the neighbour ZIP of 878 and vice versa, so if both are in the data, we only need to check and merge for one
+    smallzips_values.remove('878') if '878' in smallzips_values and '879' in smallzips_values else None
+
+    # Making df to get dictionary for kwordcheck
+    smallzips_neighbours = zip3_small[zip3_small.code.isin(smallzips_values)]
+
+    # Tweaking df to format dictionary so it can be used in function
+    smallzips_neighbours_kwords = smallzips_neighbours.set_index('patient_adr_zip__subcat_' \
+        + smallzips_neighbours.code,drop=False).apply(list,axis=1).to_dict()
+
+    # Finding bools
+    smallneighzips_dfbool = kwordcheck(df,smallzips_neighbours_kwords,getbools=True)
+
+    print(f'Editing a total of {smallneighzips_dfbool.sum().sum()} rows with small and neighbouring ZIP codes',end = "\n\n")
+    
+    df_out = df if inplace else df.copy()
+        
+    for i, col in enumerate(smallneighzips_dfbool.columns):
+        small = smallzips_neighbours_kwords[col][0]
+        neighbour = smallzips_neighbours_kwords[col][1]
+        
+        print(f'Merging {smallneighzips_dfbool[col].sum()} rows with small ZIP {small} or neighbouring ZIP {neighbour}')
+        df_out[zipcol] = df_out[zipcol].where(
+                                ~smallneighzips_dfbool[col], 
+                                small + '_' + neighbour)
+    
+    if not inplace:    
+        return df_out   
+    pass

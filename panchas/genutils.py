@@ -237,7 +237,7 @@ def check_state(df,statecol):
 
     valid_states = load_codeset('state_zip3').state
     
-    ph.display_sbs([df[statecol].value_counts()],max_rows=10)
+    display_sbs([df[statecol].value_counts()],max_rows=10)
     nonapolcor_states = df[statecol].dropna().unique()[~np.isin(df[statecol].dropna().unique(),state_zip3.state)]
     print('Non-apolcor and invalid states:', end = ' ')
     print(*nonapolcor_states,sep=', ')

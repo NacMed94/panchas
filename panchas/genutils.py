@@ -233,6 +233,8 @@ def get_zip3state():
 
 def check_state(df,statecol):
     
+    from reference_data.search import load_codeset
+
     valid_states = load_codeset('state_zip3').state
     
     ph.display_sbs([df[statecol].value_counts()],max_rows=10)
@@ -244,6 +246,8 @@ def check_state(df,statecol):
 
     
 def check_zips(df,zipcol,statecol):
+    
+    from reference_data.search import load_codeset
     
     valid_zips = load_codeset('state_zip3').zips.loc[52][1:]
     nonapolcor_zips_bool = ~df[zipcol].isin(valid_zips).values
@@ -259,6 +263,9 @@ def check_zips(df,zipcol,statecol):
 def check_zipstate_misal(df, zipcol,statecol):
 
     """This function checks if there are any rows with misaligned values for ZIP and state."""
+
+    from reference_data.search import load_codeset
+
     zip3_state = ph.get_zip3state()
     # Not taking into account non-apolcor (and invalid and null) ZIPs and states
     misal_bool = df[zipcol].isin(zip3_state.zips) & df[statecol].isin(zip3_state.state.unique()) & (~df[[zipcol,statecol]].astype(str).sum(axis=1).isin(zip3_state.sum(axis=1).values))

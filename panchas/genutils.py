@@ -229,3 +229,40 @@ def get_zip3state():
     zip3_state['state'] = zip3_state.state.apply(lambda row: row[0])
 
     return zip3_state
+
+
+def check_state(df,statecol):
+    
+    valid_states = load_codeset('state_zip3').state
+    
+    ph.display_sbs([df[statecol].value_counts()],max_rows=10)
+    nonapolcor_states = df[statecol].dropna().unique()[~np.isin(df[statecol].dropna().unique(),state_zip3.state)]
+    print('Non-apolcor and invalid states:', end = ' ')
+    print(*nonapolcor_states,sep=', ')
+    
+    pass
+
+    
+def check_zips(df,zipcol,statecol):
+    
+    valid_zips = load_codeset('state_zip3').zips.loc[52][1:]
+    nonapolcor_zips_bool = ~df[zipcol].isin(valid_zips).values
+    # Dropping null ZIPs (to visualise better) and filling null states to visualise nonapolcor ZIPs on empty states
+    nonapolcor_zips_s = df.loc[nonapolcor_zips_bool,[zipcol,statecol]].dropna(subset=zipcol).fillna('no_state').groupby(statecol).value_counts()
+    display(pd.DataFrame(nonapolcor_zips_s.rename('ZIP_value_counts')))
+    print("Non-apolcor and invalid ZIPs:", end = ' ')
+    print(*nonapolcor_zips_s.index.droplevel(0).unique(),sep=', ')
+    
+    return nonapolcor_zips_bool
+
+
+def check_zipstate_misal(df, zipcol,statecol):
+
+    """This function checks if there are any rows with misaligned values for ZIP and state."""
+    zip3_state = ph.get_zip3state()
+    # Not taking into account non-apolcor (and invalid and null) ZIPs and states
+    misal_bool = df[zipcol].isin(zip3_state.zips) & df[statecol].isin(zip3_state.state.unique()) & (~df[[zipcol,statecol]].astype(str).sum(axis=1).isin(zip3_state.sum(axis=1).values))
+
+    print(f'There are {misal_bool.sum()} claims with misaligned ZIP and state')
+
+    return misal_bool

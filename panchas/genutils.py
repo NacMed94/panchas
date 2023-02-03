@@ -266,7 +266,7 @@ def check_zipstate_misal(df, zipcol,statecol):
 
     from reference_data.search import load_codeset
 
-    zip3_state = ph.get_zip3state()
+    zip3_state = get_zip3state()
     # Not taking into account non-apolcor (and invalid and null) ZIPs and states
     misal_bool = df[zipcol].isin(zip3_state.zips) & df[statecol].isin(zip3_state.state.unique()) & (~df[[zipcol,statecol]].astype(str).sum(axis=1).isin(zip3_state.sum(axis=1).values))
 

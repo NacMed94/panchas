@@ -278,7 +278,8 @@ def check_zipstate_misal(df, zipcol,statecol):
 def smallzip_merger(df, zipcol, inplace=True):
     ''' 
     Finds small ZIPs and merges them with neighbour with format SMALLZIP_NEIGHBOUR
-    Uses kwordcheck twice (would be faster if integrated but quick solution)
+    Uses kwordcheck twice (would be faster if integrated but quick solution).
+    Inplace default is True because I like to live dangerously.
     '''
     from reference_data.search import load_codeset
     from panchas import kwordcheck
@@ -304,6 +305,7 @@ def smallzip_merger(df, zipcol, inplace=True):
 
     print(f'Editing a total of {smallneighzips_dfbool.sum().sum()} rows with small and neighbouring ZIP codes',end = "\n\n")
     
+    # Making a copy if inplace is False
     df_out = df if inplace else df.copy()
         
     for i, col in enumerate(smallneighzips_dfbool.columns):
@@ -311,10 +313,6 @@ def smallzip_merger(df, zipcol, inplace=True):
         neighbour = smallzips_neighbours_kwords[col][1]
         
         print(f'Merging {smallneighzips_dfbool[col].sum()} rows with small ZIP {small} or neighbouring ZIP {neighbour}')
-        df_out[zipcol] = df_out[zipcol].where(
-                                ~smallneighzips_dfbool[col], 
-                                small + '_' + neighbour)
+        df_out[zipcol].where(~smallneighzips_dfbool[col], small + '_' + neighbour, inplace = True)
     
-    if not inplace:    
-        return df_out   
-    pass
+    return df_out if not inplace else None

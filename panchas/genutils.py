@@ -357,7 +357,7 @@ def read_folder_dfs(folderpath, varnames = [], filetype='csv', delimiter=',', in
         print(f'Saved file {filepath} as global variable {varname}')
         dfs_list.append(globals()[varname])
         if dfs_display:
-            display(dfs[i].head(3))
+            display(dfs_list[i].head(3))
         print('\n')
         
     return dfs_list

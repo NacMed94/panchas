@@ -322,3 +322,11 @@ def smallzip_merger(df, zipcol, inplace=True):
         df_out[zipcol].where(~smallneighzips_dfbool[col], small + '_' + neighbour, inplace = True)
     
     return df_out if not inplace else None
+
+
+def column_merger(df,*categories):
+    
+    for cat in categories:
+        catcols = df.columns[df.columns.str.contains(cat,case=False)]
+        df[cat] = df[catcols].any(axis=1).rename(cat)
+        df.drop(columns = catcols,inplace = True)

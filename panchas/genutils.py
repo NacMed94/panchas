@@ -332,7 +332,7 @@ def column_merger(df,*categories):
         df.drop(columns = catcols,inplace = True)
         
 
-def read_folder_dfs(folderpath, varnames = [], filetype='csv',delimiter=',',index_col=0):
+def read_folder_dfs(folderpath, varnames = [], filetype='csv', delimiter=',', index_col=0, dfs_display=True):
     
     ''' Reads all .csv or .pkl files in folder and stores them in global variables. '''
     
@@ -354,5 +354,6 @@ def read_folder_dfs(folderpath, varnames = [], filetype='csv',delimiter=',',inde
             return None
 
         print(f'Saved file {filepath} as global variable {varname}')
-        display(globals()[varname].head(3))
+        if dfs_display:
+            display(globals()[varname].head(3))
         print('\n')

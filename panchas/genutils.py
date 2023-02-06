@@ -253,7 +253,7 @@ def check_zips(df,zipcol,statecol):
     nonapolcor_zips_bool = (~df[zipcol].isin(valid_zips).values) & df[zipcol].notna() 
     
     # If no invalid/non-apolcor ZIP codes are present (all in bool are False), print so and return None
-    if not nonapolcor_zips_bool.any()
+    if not nonapolcor_zips_bool.any():
         print('No non-apolcor ZIPs present')
         return None
     

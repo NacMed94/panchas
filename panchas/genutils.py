@@ -330,3 +330,29 @@ def column_merger(df,*categories):
         catcols = df.columns[df.columns.str.contains(cat,case=False)]
         df[cat] = df[catcols].any(axis=1).rename(cat)
         df.drop(columns = catcols,inplace = True)
+        
+
+def read_folder_dfs(folderpath, varnames = [], filetype='csv',delimiter=',',index_col=0):
+    
+    ''' Reads all .csv or .pkl files in folder and stores them in global variables. '''
+    
+    from os import listdir
+    fnames = listdir(folderpath)
+    for i,file in enumerate(fnames):
+        
+        if varnames == []:
+            varname = re.search('.+[.]',file)[0][:-1]
+               
+        # Reading df into global variable with varname as name
+        filepath = folderpath + '/' + file 
+        if filetype == 'csv':
+            globals()[varname] = pd.read_csv(filepath, delimiter=delimiter,index_col=index_col) # Setting delimiter and index column
+        elif filetype == 'pkl':
+            globals()[varname] = pd.read_pickle(filepath) # Setting delimiter and index column
+        else:
+            print("Sorry, can't read that")
+            return None
+
+        print(f'Saved file {filepath} as global variable {varname}')
+        display(globals()[varname].head(3))
+        print('\n')

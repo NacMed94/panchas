@@ -338,6 +338,7 @@ def read_folder_dfs(folderpath, keys = [], filetype='csv', delimiter=',', index_
     
     from os import listdir
     fnames = listdir(folderpath)
+    fnames.sort()
     df_dict = dict()
     for i,file in enumerate(fnames):
         

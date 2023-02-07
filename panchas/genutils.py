@@ -345,7 +345,8 @@ def read_folder_dfs(folderpath, varnames = [], filetype='csv', delimiter=',', in
             varname = re.search('.+[.]',file)[0][:-1]
                
         # Reading df into global variable with varname as name
-        filepath = folderpath + '/' + file 
+        filepath = folderpath + '/' + file
+        global varname
         if filetype == 'csv':
             globals()[varname] = pd.read_csv(filepath, delimiter=delimiter,index_col=index_col) # Setting delimiter and index column
         elif filetype == 'pkl':

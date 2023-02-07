@@ -332,33 +332,33 @@ def column_merger(df,*categories):
         df.drop(columns = catcols,inplace = True)
         
 
-def read_folder_dfs(folderpath, varnames = [], filetype='csv', delimiter=',', index_col=0, dfs_display=True):
+def read_folder_dfs(folderpath, keys = [], filetype='csv', delimiter=',', index_col=0, dfs_display=True):
     
     ''' Reads all .csv or .pkl files in folder and stores them in global variables. '''
     
     from os import listdir
     fnames = listdir(folderpath)
-    dfs_list = []
+    df_dict = dict()
     for i,file in enumerate(fnames):
         
-        if varnames == []:
-            varname = re.search('.+[.]',file)[0][:-1]
+        if keys == []:
+            key = re.search('.+[.]',file)[0][:-1]
+        else:
+            key = keys[i]
                
         # Reading df into global variable with varname as name
         filepath = folderpath + '/' + file
-        global varname
         if filetype == 'csv':
-            globals()[varname] = pd.read_csv(filepath, delimiter=delimiter,index_col=index_col) # Setting delimiter and index column
+            df_dict[key] = pd.read_csv(filepath, delimiter=delimiter,index_col=index_col) # Setting delimiter and index column
         elif filetype == 'pkl':
-            globals()[varname] = pd.read_pickle(filepath) # Setting delimiter and index column
+            df_dict[key] = pd.read_pickle(filepath) # Setting delimiter and index column
         else:
             print("Sorry, can't read that")
             return None
 
-        print(f'Saved file {filepath} as global variable {varname}')
-        dfs_list.append(globals()[varname])
+        print(f'Saving file {filepath} into dictionary with key {key}')
         if dfs_display:
-            display(dfs_list[i].head(3))
+            display(df_dict[key].head(3))
         print('\n')
         
-    return dfs_list
+    return df_dict

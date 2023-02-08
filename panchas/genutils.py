@@ -231,7 +231,7 @@ def get_zip3state():
     return zip3_state
 
 
-def check_state(df,statecol):
+def check_state(df,statecol = 'State'):
     
     from reference_data.search import load_codeset
 
@@ -245,7 +245,7 @@ def check_state(df,statecol):
     pass
 
     
-def check_zips(df,zipcol,statecol):
+def check_zips(df,zipcol = 'Zip',statecol = 'State',df_display = True):
     
     from reference_data.search import load_codeset
     
@@ -257,11 +257,13 @@ def check_zips(df,zipcol,statecol):
         print('No non-apolcor ZIPs present')
         return None
     
-    # Dropping null ZIPs (to visualise better) and filling null states to visualise nonapolcor ZIPs on empty states
-    nonapolcor_zips_s = df.loc[nonapolcor_zips_bool,[zipcol,statecol]].fillna('no_state').groupby(statecol).value_counts()
-    display(pd.DataFrame(nonapolcor_zips_s.rename('ZIP_value_counts')))
-    print("Non-apolcor and invalid ZIPs:", end = ' ')
-    print(*nonapolcor_zips_s.index.droplevel(0).unique(),sep=', ')
+    if df_diplay:
+        
+        # Dropping null ZIPs (to visualise better) and filling null states to visualise nonapolcor ZIPs on empty states
+        nonapolcor_zips_s = df.loc[nonapolcor_zips_bool,[zipcol,statecol]].fillna('no_state').groupby(statecol).value_counts()
+        display(pd.DataFrame(nonapolcor_zips_s.rename('ZIP_value_counts')))
+        print("Non-apolcor and invalid ZIPs:", end = ' ')
+        print(*nonapolcor_zips_s.index.droplevel(0).unique(),sep=', ')
     
     return nonapolcor_zips_bool
 

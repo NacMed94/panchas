@@ -257,7 +257,7 @@ def check_zips(df,zipcol = 'Zip',statecol = 'State',df_display = True):
         print('No non-apolcor ZIPs present')
         return None
     
-    if df_diplay:
+    if df_display:
         
         # Dropping null ZIPs (to visualise better) and filling null states to visualise nonapolcor ZIPs on empty states
         nonapolcor_zips_s = df.loc[nonapolcor_zips_bool,[zipcol,statecol]].fillna('no_state').groupby(statecol).value_counts()

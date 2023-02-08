@@ -276,7 +276,7 @@ def check_zipstate_misal(df, zipcol,statecol):
     # Not taking into account non-apolcor (and invalid and null) ZIPs and states
     misal_bool = df[zipcol].isin(zip3_state.zips) & df[statecol].isin(zip3_state.state.unique()) & (~df[[zipcol,statecol]].astype(str).sum(axis=1).isin(zip3_state.sum(axis=1).values))
 
-    print(f'There are {misal_bool.sum()} claims with misaligned ZIP and state')
+    print(f'There are {misal_bool.sum()} rows with misaligned ZIP and state')
 
     return misal_bool
 

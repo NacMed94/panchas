@@ -365,3 +365,24 @@ def read_folder_dfs(folderpath, keys = [], filetype='csv', delimiter=',', index_
         print('\n')
         
     return df_dict
+
+
+def fill_state(df, zipcol = 'Zip', statecol = 'State'):
+    ''' 
+    Creating Zip-State masterlist with same length as df to fill states on df
+    Filling on null values only (understood as NaNs or 'NULL')
+    '''
+    
+    zipstate = get_zip3state().set_index('zips') # State per ZIP with ZIP as index
+    zipstate.loc['NULL'] = 'NULL' # Adding 'NULL' to index
+    
+    # Creating masterlist by indexing on apolcor ZIPs (non-apolcor ZIPs will have state 'NULL) 
+    # .where necessary so that all values are in zipstate zip index
+    zipstate = zipstate.loc[
+        df[zipcol].where(df[zipcol].isin(zipstate.index), 'NULL')]
+    
+    # Where state is 'NULL' or missing we substitute by the state corresponding the ZIP 
+    # (if ZIP also 'NULL' or missing 'NULL' will remain)
+    df[statecol].where((df[statecol]!='NULL') & (df[statecol].notna()),
+                       np.concatenate(zipstate.values),
+                       inplace = True)

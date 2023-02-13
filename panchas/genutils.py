@@ -164,7 +164,7 @@ def code_inspector(s,printrows=None,sep='\t'):
 
 def get_all_codes():
   
-    from reference_data.file_operations import get_all_code_categories
+    from reference_data.file_operations import get_all_code_categories, get_code_category_code_types
     
     possible_codes = set()
     for cct in get_all_code_categories():

@@ -106,7 +106,8 @@ def kwordcheck(df,kwordsdict,scancols = [],startswcols = [],getbools = False):
                 # Iterates over keywords in keyword list for each value
                 for word in kwords:
                     # If one of the keywords starts with the column strings, value of risky_values is True
-                    risky_values[col] = risky_values[col] | df[original_col].str.startswith(word, case = False)
+                    # Not supporting case
+                    risky_values[col] = risky_values[col] | df[original_col].str.startswith(word)
             else: # Looking for exact match (more efficient and default option) if no need for scanning
                 # Checking against lowercase df (only if first value is string)
                 if isinstance(df[original_col].dropna().iloc[0],str):
@@ -141,7 +142,8 @@ def kwordcheck(df,kwordsdict,scancols = [],startswcols = [],getbools = False):
                 # Iterates over keywords in keyword list for each value
                 for word in kwords:
                     # If one of the keywords is contained in the column strings, value of risky_bool is True
-                    risky_bool = risky_bool | pd.Series(unique_values).str.startswith(word,case=False)
+                    # Not supporting case 
+                    risky_bool = risky_bool | pd.Series(unique_values).str.startswith(word)
                 # Storing matched values on risky_values for relevant key
                 risky_values[ky] = unique_values[risky_bool]
             # Looking for exact match (more efficient and default)

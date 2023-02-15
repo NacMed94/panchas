@@ -65,7 +65,7 @@ def save_as_html(html_object,filename='report.html'):
     pass
     
     
-def kwordcheck(df,kwordsdict,scancols = [],getbools = False):
+def kwordcheck(df,kwordsdict,scancols = [],startswcols = [],getbools = False):
     '''
     This code returns a df with same index as original df and with same column name 
     as the column being checked for keywords when getbools is passed as True. If False
@@ -77,6 +77,7 @@ def kwordcheck(df,kwordsdict,scancols = [],getbools = False):
     facility/payer/provider names). When getbools is True, the output df has boolean 
     values (True if row/column value in original df contains keyword, False otherwise). 
     This boolean df can be used to check value counts on df, remove offending rows... 
+    Adding startswith options for ICD CM codes (or anything really)
     '''
     
     # Columns of output df are the columns present in the kwordsdict
@@ -99,8 +100,13 @@ def kwordcheck(df,kwordsdict,scancols = [],getbools = False):
                 # Iterates over keywords in keyword list for each value
                 for word in kwords:
                     # If one of the keywords is contained in the column strings, value of risky_values is True
-                    # Removing suffix from column name of original df
                     risky_values[col] = risky_values[col] | df[original_col].str.contains(word, case = False)
+            elif original_col in startswcols:
+                risky_values[col] = False
+                # Iterates over keywords in keyword list for each value
+                for word in kwords:
+                    # If one of the keywords starts with the column strings, value of risky_values is True
+                    risky_values[col] = risky_values[col] | df[original_col].str.startswith(word, case = False)
             else: # Looking for exact match (more efficient and default option) if no need for scanning
                 # Checking against lowercase df (only if first value is string)
                 if isinstance(df[original_col].dropna().iloc[0],str):
@@ -127,6 +133,15 @@ def kwordcheck(df,kwordsdict,scancols = [],getbools = False):
                 for word in kwords:
                     # If one of the keywords is contained in the column strings, value of risky_bool is True
                     risky_bool = risky_bool | pd.Series(unique_values).str.contains(word,case=False)
+                # Storing matched values on risky_values for relevant key
+                risky_values[ky] = unique_values[risky_bool]
+            
+            elif original_col in startswcols:
+                risky_bool = [False]*len(unique_values)
+                # Iterates over keywords in keyword list for each value
+                for word in kwords:
+                    # If one of the keywords is contained in the column strings, value of risky_bool is True
+                    risky_bool = risky_bool | pd.Series(unique_values).str.startswith(word,case=False)
                 # Storing matched values on risky_values for relevant key
                 risky_values[ky] = unique_values[risky_bool]
             # Looking for exact match (more efficient and default)
